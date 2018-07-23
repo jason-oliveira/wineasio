@@ -1,12 +1,51 @@
 CONTENTS
 ========
-1. Installation
+0. Prebuilt binaries
+1. Installation From Source Code
 2. General Information
 3. Change Log
 4. Legal Stuff
 
-1. INSTALLATION
----------------
+0. PREBUILT BINARIES
+--------------------
+
+This repository (https://github.com/Jajcus/wineasio) is a fork of the original
+wineasio repository (https://github.com/jhernberg/wineasio) made to provide
+pre-built Wineasio binaries.
+
+The code is automatically built using Travis-CI and Docker, in an Ubuntu 14.04
+environment and Wine 1.6. The Wine seems stable enough for these binaries to
+work across different Linux distributions and wine versions.
+
+The binaries are available in the Releases_ tab. One is 'wineasio-32.dll.so'
+and is intended for 32-bit wine and the other is 'wineasio-64.dll.so', for
+64-bit wine. Both should be installed as 'wineasio.dll.so' in the directory
+when wine looks for its built-in DLL files. E.g. /usr/lib/i386-linux-gnu/wine/
+for 32-bit wine in Ubuntu 14.04. Alternatively a different directory may be
+used and its path provided to Wine in the WINEDLLPATH environment variable.
+
+After placing the files they need to be registered with:
+
+# regsvr32 wineasio.dll
+
+Example (system installation, 32- and 64-bit):
+
+# sudo install wineasio-32.dll.so /usr/lib/i386-linux-gnu/wine
+# WINEARCH=win32 WINEPREFIX=~/.wine regsvr32 wineasio.dll
+# sudo install wineasio-64.dll.so /usr/lib/x86_64-linux-gnu/wine
+# WINEARCH=win64 WINEPREFIX=~/.wine64 regsvr32 wineasio.dll
+
+Another example (user home install, 32-bit)
+
+# mkdir -p ~/.wine/dll
+# install wineasio-32.dll.so ~/.wine/dll/
+# WINEARCH=win32 WINEPREFIX=~/.wine WINEDLLPATH=~/.wine/dll regsvr32 wineasio.dll
+
+.. _Releases: https://github.com/Jajcus/wineasio/releases
+
+
+1. INSTALLATION FROM SOURCE CODE
+--------------------------------
 
 Copy the file asio.h from Steinberg's ASIO SDK to the wineasio source
 directory.
