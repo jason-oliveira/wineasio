@@ -1,0 +1,26 @@
+services:
+- docker
+sudo: required
+before_install:
+- docker pull jajcus/wineasio-build-env-32:latest
+- docker pull jajcus/wineasio-build-env-64:latest
+- docker build --cache-from jajcus/wineasio-build-env-32:latest -t jajcus/wineasio-build-env-32 .build-env-32
+- docker build --cache-from jajcus/wineasio-build-env-64:latest -t jajcus/wineasio-build-env-64 .build-env-64
+- wget https://www.steinberg.net/sdk_downloads/ASIOSDK2.3.1.zip
+- unzip -j ASIOSDK2.3.1.zip */*/common/asio.h
+script:
+- docker run -v "$HOME:$HOME" -w "$PWD" jajcus/wineasio-build-env-32 make clean all
+- mv wineasio.dll.so wineasio-32.dll.so
+- bash ./prepare_64bit_asio
+- docker run -v "$HOME:$HOME" -w "$PWD" jajcus/wineasio-build-env-64 make -f Makefile64 clean all WINECC="winegcc -m64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu/wine"
+- mv wineasio.dll.so wineasio-64.dll.so
+deploy:
+  provider: releases
+  api_key:
+    secure: DC6pe2Ig5zONjdbNlWdvYaLSQ74I1FHadEQwCjeZ3Bwtoowtl5P8Xs8AjlSzbRqCoyecVfjK1PKPGuPYOgqVJPidDiDCJIcJUQnGPOHYi62wCgiDGs/YDMAkRP2c0cH7bACO2NJ5jemqh5tPjUDGx5zvAxFl+I4WYWi0RXR90r8AWg6p711IDqAc00fyoomcxwYWS0eD98Vz8hd/Ir+0BJGqtB//0SEMgvUspPwlfEs2pX5+lqP45jD67HPQlxSLLkY4kT4Bg+W4Ptp3nAQ/A6AsZtiY0IQsuWYa0jIFqahM2XWLLLBTDcIcD24YvdkRCD7WPx3m/5kfFxojqsdIWxEWP2oThTXaVV0YDqrLevzcWU7uuEoXu9KkGyKa+PWr2fcT0UJFC0WcYavPRvsnzM9iqgt6V7fQcdD69TFE7w+sd3B6feQsd2nOzo3D1bt0gQyRqfjLwI0qHCHxt0bXfOHcPnO640elfBQX2Y667eERvZZhOnGJ4qp2XiJDXXo9KIanZBYTcJkrVHcbGTrcgun6xQGA9TlibMJV0x8q1uwuxgYi8KtlPlc5thSW/9Wn4yDs/OpniO8GWt19X8GwSz1BSAMziUBOtPDkqDaEayYOlqJ8T9zm2YjBeF/74B810p32oKYHdNYiqSMDUah5uI+Mp/H4efcb+KxfNWtumlM=
+  file:
+    - wineasio-32.dll.so
+    - wineasio-64.dll.so
+  skip_cleanup: true
+  on:
+    tags: true
